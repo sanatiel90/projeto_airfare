@@ -1,0 +1,101 @@
+create table CARTOES_CREDITO (
+id int not null auto_increment,
+nome varchar(30) not  null,
+primary key(id)
+);
+
+
+create table ESTADOS (
+id int not null auto_increment,
+uf char(2) not null,
+primary key(id)
+);
+
+
+create table CIDADES (
+id int not null auto_increment,
+nome varchar(30) not null,
+cod_estado int not null,
+primary key(id),
+constraint fk_estado foreign key(cod_estado) references estados(id)
+);
+
+
+create table COMPANHIAS (
+id int not null auto_increment,
+nome varchar (50) not null,
+primary key(id)
+);
+
+
+create table CLIENTES (
+id int not null auto_increment, 
+nome varchar(80)not null,
+cpf char(11) not null,
+email varchar(50) unique not null,
+telefone varchar(18),
+rg char(11) not null,
+senha varchar(30) not null,
+cod_cartao_credito int not null,
+primary key(id),
+constraint fk_cartao_credito foreign key(cod_cartao_credito) references cartoes_credito(id)
+);
+
+
+create table AEROPORTOS (
+id int not null auto_increment,
+nome  varchar(30)not null,
+cod_cidade int not null,
+primary key(id),
+constraint fk_cidade foreign key(cod_cidade) references cidades(id)
+);
+
+
+create table VOOS (
+id int not null auto_increment,
+preco decimal not null,
+cod_aeroporto_origem int not null,
+cod_aeroporto_destino int not null,
+hora_saida time not null,
+hora_chegada time not null,
+duracao_voo time not null,
+data_voo date not null,
+vagas_disponiveis int not null,
+cod_companhia int not null,
+primary key(id),
+constraint fk_aeroporto_origem foreign key(cod_aeroporto_origem ) references aeroportos(id),
+constraint fk_aeroporto_destino foreign key(cod_aeroporto_destino ) references aeroportos(id),
+constraint fk_companhia foreign key(cod_companhia) references companhias(id)
+);
+
+
+create table PEDIDOS (
+id int not null auto_increment,
+quantidade_pessoas int not null,
+preco_total decimal  not null,
+cod_voo int not null, 
+cod_cliente int not null,
+primary key(id),
+constraint fk_cliente foreign key(cod_cliente) references clientes(id),
+constraint fk_voo foreign key(cod_voo) references voos(id)
+);
+
+
+create table FUNCIONARIOS (
+id int not null auto_increment,
+nome varchar(50)not null,
+email varchar(50) unique not null,
+telefone varchar(18),
+cpf char(11) not null,
+senha varchar(30) not null,
+salario decimal not null,
+primary key(id)
+);
+
+
+------------------------
+//VIEW PARA VISUALIZAR TODOS OS DADOS DO VÔO
+
+create view v_dados_voo
+as
+select voos.id, a.nome as aeroporto_origem, b.nome as aeroporto_destino,voos.data_voo,voos.hora_saida,voos.hora_chegada,voos.duracao_voo,voos.vagas_disponiveis,voos.preco,companhias.nome as companhia,cid_origem.nome as cidade_origem,cid_destino.nome as cidade_destino,estado_origem.uf as estado_origem,estado_destino.uf as estado_destino from aeroportos a inner join voos on a.id = voos.cod_aeroporto_origem inner join aeroportos b on b.id = voos.cod_aeroporto_destino inner join companhias on companhias.id = voos.cod_companhia inner join cidades cid_origem on cid_origem.id = a.cod_cidade inner join cidades cid_destino on cid_destino.id = b.cod_cidade inner join estados estado_origem on estado_origem.id = cid_origem.cod_estado inner join estados estado_destino on estado_destino.id = cid_destino.cod_estado
